@@ -1,23 +1,37 @@
 diff --git a/src/daemon.c b/src/daemon.c
-index 9e59b83..1136bdd 100644
+index 9e59b83..c4878fb 100644
 --- a/src/daemon.c
 +++ b/src/daemon.c
-@@ -1809,6 +1809,7 @@ daemon_create_user_backend (Daemon         *daemon,
+@@ -1803,10 +1803,11 @@ daemon_create_user_backend (Daemon         *daemon,
+         g_autofree char *admin_groups = NULL;
+         GError *inner_error = NULL;
+         User *user = NULL;
+-        const gchar *argv[9] = { NULL };
++        const gchar *argv[10] = { NULL };
+         int i = 0;
+ 
          argv[i++] = "/usr/sbin/useradd";
++        argv[i++] = "--extrausers";
          argv[i++] = "-m";
          argv[i++] = "-c";
-+        argv[i++] = "--extrausers";
          argv[i++] = cd->real_name;
+@@ -2026,7 +2027,7 @@ daemon_delete_shadow_user (Daemon                *daemon,
+         const gchar *username;
+         const gchar *homedir;
+         gchar *resolved_homedir;
+-        const gchar *argv[6];
++        const gchar *argv[7];
+         int i = 0;
  
-         if (admin_groups != NULL) {
-@@ -2042,6 +2043,7 @@ daemon_delete_shadow_user (Daemon                *daemon,
+         username = accounts_user_get_user_name (ACCOUNTS_USER (user));
+@@ -2041,6 +2042,7 @@ daemon_delete_shadow_user (Daemon                *daemon,
+         free (resolved_homedir);
  
          argv[i++] = "/usr/sbin/userdel";
-         argv[i++] = "-f";
 +        argv[i++] = "--extrausers";
+         argv[i++] = "-f";
  
          if (rm_files)
-                 argv[i++] = "-r";
 diff --git a/src/meson.build b/src/meson.build
 index 2a09584..3681f96 100644
 --- a/src/meson.build
