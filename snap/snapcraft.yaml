@@ -8,9 +8,20 @@ description: |
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: strict
 
+package-repositories:
+ - type: apt
+   ppa: desktop-snappers/core-desktop
+   priority: always
+
 layout:
-  /var/lib/AccountsService:
-    type: tmpfs
+  /usr/sbin/chpasswd:
+    bind-file: $SNAP/usr/sbin/chpasswd
+  /usr/sbin/passwd:
+    bind-file: $SNAP/usr/sbin/passwd
+  /usr/sbin/chage:
+    bind-file: $SNAP/usr/sbin/chage
+  /usr/sbin/useradd:
+    bind-file: $SNAP/usr/sbin/useradd
 
 apps:
   accounts-daemon:
@@ -55,6 +66,9 @@ parts:
     stage-packages:
       - libpolkit-gobject-1-0
       - libjson-c5
+      - passwd
     override-pull: |
       craftctl default
       patch -p1 < $CRAFT_PROJECT_DIR/patches/accounts-daemon.patch
+      rm -rf $CRAFT_STAGE/usr/share/doc
+      rm -rf $CRAFT_STAGE/usr/share/man
