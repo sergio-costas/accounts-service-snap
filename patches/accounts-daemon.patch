@@ -1,0 +1,48 @@
+diff --git a/src/daemon.c b/src/daemon.c
+index 9e59b83..1136bdd 100644
+--- a/src/daemon.c
++++ b/src/daemon.c
+@@ -1809,6 +1809,7 @@ daemon_create_user_backend (Daemon         *daemon,
+         argv[i++] = "/usr/sbin/useradd";
+         argv[i++] = "-m";
+         argv[i++] = "-c";
++        argv[i++] = "--extrausers";
+         argv[i++] = cd->real_name;
+ 
+         if (admin_groups != NULL) {
+@@ -2042,6 +2043,7 @@ daemon_delete_shadow_user (Daemon                *daemon,
+ 
+         argv[i++] = "/usr/sbin/userdel";
+         argv[i++] = "-f";
++        argv[i++] = "--extrausers";
+ 
+         if (rm_files)
+                 argv[i++] = "-r";
+diff --git a/src/meson.build b/src/meson.build
+index 2a09584..3681f96 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -32,8 +32,8 @@ cflags = [
+   '-DLOCALSTATEDIR="@0@"'.format(act_localstatedir),
+   '-DDATADIR="@0@"'.format(act_datadir),
+   '-DSYSCONFDIR="@0@"'.format(act_sysconfdir),
+-  '-DICONDIR="@0@"'.format(join_paths(act_localstatedir, 'lib', 'AccountsService', 'icons')),
+-  '-DUSERDIR="@0@"'.format(join_paths(act_localstatedir, 'lib', 'AccountsService', 'users')),
++  '-DICONDIR="@0@"'.format(join_paths('/etc', 'writable', 'AccountsService', 'icons')),
++  '-DUSERDIR="@0@"'.format(join_paths('/etc', 'writable', 'AccountsService', 'users')),
+ ]
+ 
+ libaccounts_shared = static_library(
+diff --git a/src/util.c b/src/util.c
+index f99dfac..2645493 100644
+--- a/src/util.c
++++ b/src/util.c
+@@ -422,7 +422,7 @@ init_dirs (void)
+ 
+         userdir = g_strdup (USERDIR);
+         icondir = g_strdup (ICONDIR);
+-        sysconfdir = g_strdup ("/etc/");
++        sysconfdir = g_strdup ("/var/lib/extrausers");
+ }
+ 
+ void

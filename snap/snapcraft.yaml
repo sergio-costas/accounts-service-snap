@@ -1,0 +1,60 @@
+name: accounts-service
+base: core24
+version: '0.1'
+summary: Accounts-service for Ubuntu Core (Desktop)
+description: |
+  The accounts-daemon allows to create, modify and delete user accounts
+  in the system through a DBus interface and polkit security.
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: strict
+
+layout:
+  /var/lib/AccountsService:
+    type: tmpfs
+
+apps:
+  accounts-daemon:
+    command: usr/libexec/accounts-daemon
+    extensions: [gnome]
+    daemon: dbus
+    environment:
+    daemon-scope: system
+    activates-on:
+      - dbus-accounts-service
+    restart-delay: 1s
+    slots:
+      - account-daemon
+    plugs:
+      - system-observe
+
+slots:
+  dbus-accounts-service:
+    interface: dbus
+    bus: system
+    name: org.freedesktop.Accounts
+
+parts:
+  accounts-daemon:
+    source: https://gitlab.freedesktop.org/accountsservice/accountsservice.git
+    #source-tag: '23.13.9' # this version has a bug
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Doptimization=3
+      - -Ddebug=true
+      - -Dgdmconffile=/etc/writable/gdm/custom.conf
+      - -Dlightdmconffile=/etc/writable/lightdm/lightdm.conf
+      - -Dintrospection=false
+      - -Dvapi=false
+      - -Dgtk_doc=false
+      - -Ddocbook=false
+    build-packages:
+      - libpolkit-gobject-1-dev
+      - libjson-c-dev
+    stage-packages:
+      - libpolkit-gobject-1-0
+      - libjson-c5
+    override-pull: |
+      craftctl default
+      patch -p1 < $CRAFT_PROJECT_DIR/patches/accounts-daemon.patch
